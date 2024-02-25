@@ -1,19 +1,23 @@
 package actionHelper;
 
-import org.openqa.selenium.By;
-import org.openqa.selenium.Keys;
-import org.openqa.selenium.WebDriver;
-import org.openqa.selenium.WebElement;
+import com.aventstack.extentreports.Status;
+import listeners.TestListner;
+import org.apache.commons.io.FileUtils;
+import org.openqa.selenium.*;
 import org.openqa.selenium.chrome.ChromeDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.interactions.Actions;
-import org.openqa.selenium.support.ui.Select;
+import org.openqa.selenium.support.ui.*;
 
+import java.io.File;
+import java.io.IOException;
+import java.time.Duration;
 import java.util.List;
 import java.util.Set;
 import java.util.concurrent.TimeUnit;
+import java.util.function.Function;
 
-public class WebActionHelperMethods {
+public class WebActionHelperMethods extends TestListner {
 
     private WebDriver driver;
 
@@ -30,9 +34,78 @@ public class WebActionHelperMethods {
         return true;
     }
 
-    public boolean clickbutton(WebElement xpath) {
+    public void javascripExecutorClick(WebElement element){
+        JavascriptExecutor executor = (JavascriptExecutor)driver;
+        executor.executeScript("arguments[0].click();", element);
+    }
+
+    public void explicityWaitUntilElementClickable(WebElement element, long timeOut){
+        WebDriverWait wait = new WebDriverWait(driver, timeOut); // create a WebDriverWait that we will reuse
+        wait.until(ExpectedConditions.elementToBeClickable(element)).click();
+    }
+
+
+    public void waitTillPageIsLoaded(int pageLoadTimeout){
+        new WebDriverWait(driver, pageLoadTimeout).until(
+                webDriver -> ((JavascriptExecutor) webDriver).executeScript("return document.readyState").equals("complete"));
+    }
+
+    public boolean clickbutton(WebElement xpath,String btnName) {
+        flentWait(xpath);
         xpath.click();
+        implicitlyWait(5);
+        logInfo(btnName +" is clicked");
+        System.out.println(btnName+"is clicked");
         return true;
+    }
+
+
+
+    public  void retryableClick(int retryCount, long waitTimeInMilliseconds, Runnable seleniumAction) {
+        // Flag to check if the operation was successful
+        boolean flag = false;
+
+        // Loop for the number of retries
+        while (retryCount > 0 && !flag) {
+            try {
+                // Perform the Selenium operation here
+                seleniumAction.run();
+
+                // Operation completed successfully, set the flag to true
+                flag = true;
+            } catch (NoSuchElementException e) {
+                // NoSuchElementException caught, decrement the retry count
+                retryCount--;
+
+                // Wait for the specified time
+                try {
+                    Thread.sleep(waitTimeInMilliseconds);
+                } catch (InterruptedException interruptedException) {
+                    interruptedException.printStackTrace();
+                }
+
+                // If retry count is zero, the operation is deemed unsuccessful
+                if (retryCount == 0) {
+                    System.out.println("Operation Failed...");
+                }
+            }
+        }
+    }
+
+    public void logInfo(String text){
+        extentTest.log(Status.INFO,text);
+    }
+
+
+    public void logFailure(String text){
+        extentTest.log(Status.FAIL,text);
+    }
+    public void switchToIframe(String id){
+        driver.switchTo().frame(id);
+    }
+
+    public void switchToDefaultContent(){
+        driver.switchTo().defaultContent();
     }
 
     public void clickLink(String data) {
@@ -43,8 +116,9 @@ public class WebActionHelperMethods {
         driver.findElement(By.xpath(xpath)).click();
     }
 
-    public String getObjectText(String xpath) {
-        return driver.findElement(By.xpath(xpath)).getText();
+    public String getObjectText(WebElement element) {
+        logInfo(element.getText());
+        return element.getText();
     }
 
     public boolean compareString(String First, String Second) {
@@ -61,6 +135,22 @@ public class WebActionHelperMethods {
         } else
             return false;
 
+    }
+
+    public void flentWait(WebElement element){
+        Wait<WebDriver> wait = new FluentWait<WebDriver>(driver).withTimeout(Duration.ofSeconds(30))
+                .pollingEvery(Duration.ofSeconds(3)).ignoring(NoSuchElementException.class);
+
+        WebElement foo = wait.until(new Function<WebDriver, WebElement>() {
+
+            public WebElement apply(WebDriver driver) {
+
+                if (element.isDisplayed()) {
+                    return element;
+                } else
+                    return null;
+            }
+        });
     }
 
     /**
@@ -271,6 +361,10 @@ public class WebActionHelperMethods {
      * @param end
      * @return
      */
+    public void implicitlyWait(int timeINSec){
+        driver.manage().timeouts().implicitlyWait(timeINSec, TimeUnit.SECONDS);
+    }
+
 
     public boolean DoubleClickAt(String xpath, int start, int end) {
         try {
@@ -622,10 +716,17 @@ public class WebActionHelperMethods {
             List<WebElement> elements = driver.findElements(By.xpath(xpath));
 
             for (WebElement element : elements) {
-                System.out.println(element.getText());
+              //  System.out.println(element.getText());
                 if (element.getText().contains(value)) {
-                    //  System.out.println(element.getText());
-                    element.click();
+                     System.out.println(element.getText());
+                    try {
+                        // trying to set a new name...
+                        clickbutton(element,element.getText());
+                    } catch(StaleElementReferenceException e) {
+                        // retrieving the name input field again
+                        element.click();
+                        // now nameHtmlElement is no longer stale
+                    }
                 }
             }
             return true;
@@ -633,6 +734,21 @@ public class WebActionHelperMethods {
             System.out.println(e.getMessage());
         }
         return false;
+    }
+
+    public String getScreenshot(WebDriver driver, String testName) {
+        TakesScreenshot ts = (TakesScreenshot) driver;
+
+        File src = ts.getScreenshotAs(OutputType.FILE);
+
+        String path = System.getProperty("user.dir") + "/AutomationReports/" + testName + ".png";
+        File destination = new File(path);
+        try {
+            FileUtils.copyFile(src, destination);
+        } catch (IOException e) {
+            System.out.println("Capture Failed " + e.getMessage());
+        }
+        return path;
     }
 
 }

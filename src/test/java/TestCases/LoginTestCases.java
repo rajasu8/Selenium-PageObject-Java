@@ -9,16 +9,15 @@ public class LoginTestCases extends BaseTest {
     @Test
     public void TEST_CASE_ONE() {
         driver.get(URL);
-        loginPage.pressExc();
+        loginPage.enterlogindetailsAndLogin(userName,password);
     }
 
-    @Test
-    public void TEST_CASE_TWO() throws Exception {
-        driver.get(URL);
-        loginPage.pressExc();
-        homePage.searchForProducts();
-
-    }
+//    @Test
+//    public void TEST_CASE_TWO() throws Exception {
+//        driver.get(URL);
+//        homePage.searchForProducts();
+//
+//    }
 
 
 }

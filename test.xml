@@ -6,7 +6,7 @@
     </listeners>
     <test name="DeliveryOrderTest" thread-count="1">
         <classes>
-            <class name="TestCases.LoginTestCases">
+            <class name="TestCases.SendSmsTestCases">
             </class>
         </classes>
     </test>

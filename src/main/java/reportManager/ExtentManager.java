@@ -52,6 +52,7 @@ public class ExtentManager {
             htmlReporter.config().setReportName("Automation Reports ");
             htmlReporter.config().setTheme(Theme.STANDARD);
             htmlReporter.config().setEncoding("utf-8");
+            htmlReporter.config().setAutoCreateRelativePathMedia(true);
             extentReports = new ExtentReports();
             extentReports.attachReporter(htmlReporter);
             setExtent(extentReports);
