@@ -28,7 +28,7 @@ public class TestListner implements ITestListener {
     @Override
     public void onFinish(ITestContext iTestContext) {
         ExtentManager.getInstance().flush();
-    }]\
+    }
     @Override
     public void onTestStart(ITestResult iTestResult) {
         extentTest = ExtentManager.createInstance(reportFolderPath, reportName).createTest(iTestResult.getMethod().getRealClass().getSimpleName());
