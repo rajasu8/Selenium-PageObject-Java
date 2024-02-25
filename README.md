@@ -60,19 +60,19 @@ ExtentManager :In this class we are using Extent api and  initialization of Exte
 BasePageClass :In this class we have initialize all the page classes using PagePafctory conecepts(PageFactory.initElements)
 ```
 ```bash
-HomePage,Login Page :In this class we have all the locators and associated methods.
+HomePage,Login Page, Conversations Page, Contacts Page :In this class we have all the locators and associated methods.
 ```
 ##### TestCases : In this package all the TestCases is present.
 
 ```bash
 BaseTest :In this class we have initialize drivers and all the pages.
+SendSmsTestcases: In this class I have add the test case to verify the message is sent as per the template added.
 ```
 
 ##### Report
 
-![](images/Report.png)
+<img width="1745" alt="image" src="https://github.com/rajasu8/Selenium-PageObject-Java/assets/13779054/6deb9cc7-e93b-4264-a96f-48888f0dca53">
 
-![](images/Report1.png)
 
 
 
